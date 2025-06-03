@@ -16,8 +16,10 @@ export default function Component() {
           >
             <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40">
               <div className="text-center text-white">
-                <h1 className="mb-4 text-5xl font-bold">Good Morning, FILKOM!</h1>
-                <p className="text-xl opacity-90">Everything You Need Starts Here.</p>
+                <h1 className="mb-4 text-5xl font-bold">
+                  Good Morning, FILKOM!</h1>
+                <p className="text-xl opacity-90">
+                  Everything You Need Starts Here.</p>
               </div>
             </div>
           </div>
