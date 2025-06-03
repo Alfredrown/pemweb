@@ -147,7 +147,7 @@ export default function Component() {
   return (
     <div className="min-h-screen bg-[#ffffff]">
       {/* Header */}
-      <header className="flex items-center justify-between px-6 py-4 bg-[#ffffff] border-b border-[#e5e8eb]">
+      {/* <header className="flex items-center justify-between px-6 py-4 bg-[#ffffff] border-b border-[#e5e8eb]">
         <div className="flex items-center">
           <div className="text-[#0f59d2] font-bold text-xl">FILKOM</div>
         </div>
@@ -158,7 +158,7 @@ export default function Component() {
             <User className="w-4 h-4 text-white" />
           </div>
         </div>
-      </header>
+      </header> */}
 
       {/* Main Content */}
       <main className="px-6 py-8">

@@ -35,13 +35,13 @@ export default function RootLayout({
           </div>
         </div>
         <nav className="flex items-center space-x-8">
-          <a href="#" className="text-[#121417] hover:text-[#61758a] transition-colors">
+          <a href="/" className="text-[#121417] hover:text-[#61758a] transition-colors">
             Dashboard
           </a>
-          <a href="#" className="text-[#121417] hover:text-[#61758a] transition-colors">
+          <a href="/gamecorner" className="text-[#121417] hover:text-[#61758a] transition-colors">
             Game Corner
           </a>
-          <a href="#" className="text-[#121417] hover:text-[#61758a] transition-colors">
+          <a href="/pinjamsekre" className="text-[#121417] hover:text-[#61758a] transition-colors">
             LO/LOF Secretariat
           </a>
         </nav>
@@ -60,7 +60,7 @@ export default function RootLayout({
       <p className="text-center text-[#4e4e4e] text-sm py-4">
         &copy; {new Date().getFullYear()} FILKOM UB. All rights reserved. 
         <br />
-        This website is designed for the Game Corner booking system at FILKOM UB.
+        This website is designed and developed by Sabita, Sandhika, Salfredo
       </p>
       </div>
     </footer>
