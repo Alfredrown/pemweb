@@ -33,7 +33,7 @@ export default function Component() {
           </p>
 
           {/* Service Cards Grid */}
-          <div className="grid grid-cols-1 grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 gap-6">
             
             {/* Game Corner Booking */}
             <Card className="border border-[#e5e8eb] hover:shadow-lg transition-shadow">
