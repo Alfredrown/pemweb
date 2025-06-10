@@ -37,24 +37,28 @@ export default function Component() {
             
             {/* Game Corner Booking */}
             <Card className="border border-[#e5e8eb] hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="mb-4">
-                  <Calendar className="w-8 h-8 text-[#61758a]" />
-                </div>
-                <h3 className="text-xl font-semibold text-[#121417] mb-2">Game Corner Booking</h3>
-                <p className="text-[#61758a] text-sm">Reserve game corner slots for recreational activities.</p>
-              </CardContent>
+              <a href="/gamecorner">
+                <CardContent className="p-6">
+                  <div className="mb-4">
+                    <Calendar className="w-8 h-8 text-[#61758a]" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-[#121417] mb-2">Game Corner Booking</h3>
+                  <p className="text-[#61758a] text-sm">Reserve game corner slots for recreational activities.</p>
+                </CardContent>
+              </a>
             </Card>
 
             {/* LO/LOF Secretariat */}
             <Card className="border border-[#e5e8eb] hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="mb-4">
-                  <Users className="w-8 h-8 text-[#61758a]" />
-                </div>
-                <h3 className="text-xl font-semibold text-[#121417] mb-2">LO/LOF Secretariat</h3>
-                <p className="text-[#61758a] text-sm">Book now and take your organization to the next level.</p>
-              </CardContent>
+              <a href="/pinjamsekre">
+                <CardContent className="p-6">
+                  <div className="mb-4">
+                    <Users className="w-8 h-8 text-[#61758a]" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-[#121417] mb-2">LO/LOF Secretariat</h3>
+                  <p className="text-[#61758a] text-sm">Book now and take your organization to the next level.</p>
+                </CardContent>
+              </a>
             </Card>
 
             {/* Lost and Found Reporting */}
