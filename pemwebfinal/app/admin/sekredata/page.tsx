@@ -1,7 +1,7 @@
 import { Search, User } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+// import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 export default function Component() {
   const activityData = [
@@ -147,7 +147,7 @@ export default function Component() {
   return (
     <div className="min-h-screen bg-[#ffffff]">
       {/* Header */}
-      <header className="flex items-center justify-between px-6 py-4 bg-[#ffffff] border-b border-[#e5e8eb]">
+      {/* <header className="flex items-center justify-between px-6 py-4 bg-[#ffffff] border-b border-[#e5e8eb]">
         <div className="flex items-center">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-[#0a80ed] rounded-full flex items-center justify-center">
@@ -170,7 +170,7 @@ export default function Component() {
             </AvatarFallback>
           </Avatar>
         </nav>
-      </header>
+      </header> */}
 
       {/* Main Content */}
       <main className="px-6 py-8">
