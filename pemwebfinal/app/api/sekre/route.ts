@@ -9,9 +9,9 @@ const supabase = createClient(
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, nim, phoneNumber, room, time, date } = body;
+    const { name, nim, phoneNumber, room_id, waktu_mulai_layanan, waktu_selesai_layanan } = body;
 
-    if (!name || !nim || !phoneNumber || !room || !time || !date) {
+    if (!name || !nim || !phoneNumber || !room_id || !waktu_mulai_layanan || !waktu_selesai_layanan) {
       return NextResponse.json({ message: "All fields are required" }, { status: 400 });
     }
 
@@ -39,13 +39,12 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Cek slot ruangan
+    // Cek slot ruangan (apakah sudah dibooking di waktu yang sama)
     const { data: existingBooking, error: bookingError } = await supabase
-      .from("sekre_booking")
+      .from("layanan")
       .select("*")
-      .eq("room", room)
-      .eq("date", date)
-      .eq("time", time)
+      .eq("sekretariat_room_id", room_id)
+      .eq("waktu_mulai_layanan", waktu_mulai_layanan)
       .maybeSingle();
 
     if (bookingError) {
@@ -56,14 +55,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Slot already booked for this room and time" }, { status: 409 });
     }
 
-    // Insert booking
-    const { error: insertBookingError } = await supabase.from("sekre_booking").insert([
+    // Insert booking ke layanan
+    const { error: insertBookingError } = await supabase.from("layanan").insert([
       {
-        nim,
-        room,
-        date,
-        time,
-        status: "In Use",
+        mahasiswa_nim: nim,
+        sekretariat_room_id: room_id,
+        waktu_mulai_layanan,
+        waktu_selesai_layanan,
+        status: "ongoing",
       },
     ]);
 
@@ -78,8 +77,20 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET() {
-  // Untuk admin: ambil semua data booking sekre
-  const { data, error } = await supabase.from("sekre_booking").select("*");
+  // Ambil semua data booking sekre (join ke tabel sekretariat dan mahasiswa)
+  const { data, error } = await supabase
+    .from("layanan")
+    .select(`
+      layanan_id,
+      waktu_mulai_layanan,
+      waktu_selesai_layanan,
+      status,
+      mahasiswa:mahasiswa_nim (nama, nim, no_telp),
+      sekretariat:sekretariat_room_id (room_id, nama_ruangan)
+    `)
+    .not("sekretariat_room_id", "is", null)
+    .order("waktu_mulai_layanan", { ascending: false });
+
   if (error) {
     return NextResponse.json({ message: "Failed to fetch data", error }, { status: 500 });
   }
