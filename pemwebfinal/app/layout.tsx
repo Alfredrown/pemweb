@@ -3,6 +3,7 @@ import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { headers } from "next/headers"; // ⬅️ tambahkan ini
 import "./globals.css";
+import Image from "next/image";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -45,9 +46,14 @@ export default async function RootLayout({
             <>
               <header className="flex items-center justify-between px-6 py-4 bg-[#ffffff]">
                 <div className="flex items-center">
-                  <div className="text-2xl font-bold">
-                    <span className="text-orange-500">FIL</span>
-                    <span className="text-blue-500">KOM</span>
+                  <div className="flex items-center">
+                    <Image
+                      src="/logofilkom.png"
+                      alt="FILKOM Logo"
+                      width={120} // sesuaikan ukuran sesuai desain kamu
+                      height={40}
+                      priority
+                    />
                   </div>
                 </div>
                 <nav className="flex items-center space-x-8">
