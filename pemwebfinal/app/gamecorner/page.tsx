@@ -1,18 +1,20 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function GameCornerBooking() {
-  const [selectedSlot, setSelectedSlot] = useState("")
-  const [activeGame, setActiveGame] = useState<number | null>(null)
+  const [selectedSlot, setSelectedSlot] = useState("");
+  const [activeGame, setActiveGame] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     nim: "",
     phoneNumber: "",
-  })
+  });
+  const [bookedSlots, setBookedSlots] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const games = [
     { id: 1, name: "Game 1" },
@@ -21,7 +23,7 @@ export default function GameCornerBooking() {
     { id: 4, name: "Game 4" },
     { id: 5, name: "Game 5" },
     { id: 6, name: "Game 6" },
-  ]
+  ];
 
   const timeSlots = [
     "08:00",
@@ -34,36 +36,68 @@ export default function GameCornerBooking() {
     "15:00",
     "16:00",
     "17:00",
-  ]
+  ];
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-  }
-  const isValidNim = (nim: string) => {
-    return nim.length >= 5 && nim.substring(2, 5) === "515"
-  }
-  
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const fetchAvailability = async () => {
+    if (activeGame === null) {
+      alert("Please select a game first.");
+      return;
+    }
+    setIsLoading(true);
+    setBookedSlots([]);
+    try {
+      const response = await fetch("/api/layanan");
+      if (!response.ok) {
+        throw new Error("Failed to fetch data from server");
+      }
+      const result = await response.json();
+      const timeSlotStatuses = result.timeSlotStatuses || {};
+
+      const gameTimeSlots = timeSlotStatuses[activeGame] || {};
+      const bookedTimeStrings = Object.keys(gameTimeSlots).filter(
+        (time) => gameTimeSlots[time] === "ongoing" || gameTimeSlots[time] === "pending"
+      );
+
+      setBookedSlots(bookedTimeStrings);
+    } catch (error) {
+      console.error("Failed to fetch and process availability:", error);
+      alert("Could not load booking data. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGameSelect = (gameId: number) => {
+    setActiveGame(gameId);
+    setSelectedSlot("");
+    setBookedSlots([]);
+  };
 
   const handleBooking = async () => {
-    if (!formData.name || !formData.nim || !formData.phoneNumber || activeGame === null || !selectedSlot) {
-      alert("Please fill in all fields.")
-      return
+    if (
+      !formData.name ||
+      !formData.nim ||
+      !formData.phoneNumber ||
+      activeGame === null ||
+      !selectedSlot
+    ) {
+      alert("Please fill in all fields and select a game and time slot.");
+      return;
     }
-    
-    if (!isValidNim(formData.nim)) {
-      alert("Only students with NIM containing '515' in positions 3-5 can book.")
-      return
-  }
-
-    // Build datetime string
-    const selectedDate = new Date()
-    const [hour, minute] = selectedSlot.split(":")
-    selectedDate.setHours(parseInt(hour))
-    selectedDate.setMinutes(parseInt(minute))
-    selectedDate.setSeconds(0)
-
-    const isoTime = selectedDate.toISOString()
-
+    if (bookedSlots.includes(selectedSlot)) {
+      alert(
+        "This time slot is already booked. Please fetch the latest availability and select another slot."
+      );
+      return;
+    }
+    const selectedDate = new Date();
+    const [hour, minute] = selectedSlot.split(":");
+    selectedDate.setHours(parseInt(hour), parseInt(minute), 0, 0);
+    const isoTime = selectedDate.toISOString();
     const response = await fetch("/api/book", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -74,26 +108,36 @@ export default function GameCornerBooking() {
         game: activeGame,
         time: isoTime,
       }),
-    })
-
-    const result = await response.json()
+    });
+    const result = await response.json();
     if (!response.ok) {
-      alert(result.message || "Booking failed")
+      alert(result.message || "Booking failed");
     } else {
-      alert("Booking successful!")
+      alert("Booking successful!");
+      fetchAvailability();
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-[#ffffff]">
       <main className="max-w-4xl px-6 py-12 mx-auto">
         <div className="mb-12 text-center">
-          <h1 className="text-[##212121] text-3xl font-bold mb-6">Game Corner Booking</h1>
+          <h1 className="text-[#212121] text-3xl font-bold mb-4">
+            Game Corner Booking
+          </h1>
+          <p className="text-gray-500 mb-6">
+            Select a game, fetch its available time slots, and book your session.
+          </p>
         </div>
 
         <div className="mb-12 space-y-6">
           <div>
-            <Label htmlFor="name" className="text-[#212121] font-medium mb-2 block">Name</Label>
+            <Label
+              htmlFor="name"
+              className="text-[#212121] font-medium mb-2 block"
+            >
+              Name
+            </Label>
             <Input
               id="name"
               placeholder="Enter your name"
@@ -102,7 +146,12 @@ export default function GameCornerBooking() {
             />
           </div>
           <div>
-            <Label htmlFor="nim" className="text-[##212121] font-medium mb-2 block">NIM</Label>
+            <Label
+              htmlFor="nim"
+              className="text-[#212121] font-medium mb-2 block"
+            >
+              NIM
+            </Label>
             <Input
               id="nim"
               placeholder="Enter your NIM"
@@ -111,7 +160,12 @@ export default function GameCornerBooking() {
             />
           </div>
           <div>
-            <Label htmlFor="phone" className="text-[#212121] font-medium mb-2 block">Phone Number</Label>
+            <Label
+              htmlFor="phone"
+              className="text-[#212121] font-medium mb-2 block"
+            >
+              Phone Number
+            </Label>
             <Input
               id="phone"
               placeholder="Enter your phone number"
@@ -121,14 +175,25 @@ export default function GameCornerBooking() {
           </div>
         </div>
 
-        <div className="mb-8">
-          <h2 className="text-[#212121] text-xl font-semibold mb-6">Available Time Slots</h2>
+        <div className="p-6 mb-8 border rounded-lg">
+          <div className="flex flex-col items-center justify-between gap-4 mb-6 md:flex-row">
+            <h2 className="text-[#212121] text-xl font-semibold">
+              Select Game
+            </h2>
+            <Button
+              onClick={fetchAvailability}
+              disabled={isLoading || activeGame === null}
+              className="bg-[#0a80ed] hover:bg-[#0f59d2] text-white w-full md:w-auto"
+            >
+              {isLoading ? "Fetching..." : "Fetch Availability"}
+            </Button>
+          </div>
 
-          <div className="flex space-x-0 mb-6 border-b border-[#e5e8eb]">
+          <div className="flex flex-wrap justify-center mb-6 border-b border-[#e5e8eb]">
             {games.map((game) => (
               <button
                 key={game.id}
-                onClick={() => setActiveGame(game.id)}
+                onClick={() => handleGameSelect(game.id)}
                 className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
                   activeGame === game.id
                     ? "border-[#212121] text-[#212121]"
@@ -140,39 +205,51 @@ export default function GameCornerBooking() {
             ))}
           </div>
 
-          <div className="grid grid-cols-5 gap-3 mb-8">
-            {timeSlots.map((slot, index) => (
-              <Button
-                key={index}
-                variant={selectedSlot === slot ? "default" : "outline"}
-                onClick={() => setSelectedSlot(slot)}
-                className={`h-12 ${
-                  selectedSlot === slot
-                    ? "bg-[#0a80ed] hover:bg-[#0f59d2] text-white border-[#0a80ed]"
-                    : "bg-[#f0f2f5] hover:bg-[#e5e8eb] text-[#61758a] border-[#d9d9d9]"
-                }`}
-              >
-                {slot}
-              </Button>
-            ))}
+          <div className="grid grid-cols-3 gap-3 mb-8 sm:grid-cols-4 md:grid-cols-5">
+            {timeSlots.map((slot, index) => {
+              const isBooked = bookedSlots.includes(slot);
+              return (
+                <Button
+                  key={index}
+                  variant={selectedSlot === slot ? "default" : "outline"}
+                  onClick={() => !isBooked && setSelectedSlot(slot)}
+                  disabled={isBooked}
+                  className={`h-12 text-base transition-all ${
+                    selectedSlot === slot
+                      ? "bg-[#0a80ed] hover:bg-[#0f59d2] text-white border-[#0a80ed] ring-2 ring-offset-2 ring-[#0a80ed]"
+                      : isBooked
+                      ? "bg-slate-200 text-slate-400 border-slate-200 cursor-not-allowed line-through"
+                      : "bg-[#f0f2f5] hover:bg-[#e5e8eb] text-[#61758a] border-[#d9d9d9]"
+                  }`}
+                >
+                  {slot}
+                </Button>
+              );
+            })}
           </div>
 
           <div className="flex justify-end">
-            <Button
-              onClick={handleBooking}
-              className="bg-[#0a80ed] hover:bg-[#0f59d2] text-white px-6 py-3"
-            >
-              Book Selected Slot
-            </Button>
+          <Button
+  onClick={handleBooking}
+  disabled={!activeGame || !selectedSlot} // Hanya disable jika game atau slot belum dipilih
+  className={`px-6 py-3 text-lg ${
+    !activeGame || !selectedSlot
+      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+      : "bg-[#0a80ed] hover:bg-[#0f59d2] text-white"
+  }`}
+>
+  Book Selected Slot
+</Button>
           </div>
         </div>
 
         <div className="text-center">
           <p className="text-[#61758a] text-sm">
-            After completing your booking, please leave your Student ID Card to the security officer.
+            After completing your booking, please leave your Student ID Card to
+            the security officer.
           </p>
         </div>
       </main>
     </div>
-  )
+  );
 }

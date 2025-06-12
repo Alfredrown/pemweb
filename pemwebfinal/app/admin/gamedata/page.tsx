@@ -109,8 +109,12 @@ export default function GameCornerTable() {
   return (
     <div className="min-h-screen bg-[#faf9f6]">
       <main className="px-6 py-8">
-        <h1 className="text-2xl text-[#0a80ed] font-semibold mb-6">Game Corner Bookings</h1>
+      <h1 className="text-[#0a80ed] text-2xl font-semibold mb-2">Activity Overview/Game Corner</h1>
 
+      <div className="flex items-center gap-4">
+            <a href="/admin/gamedata" className="text-[#0a80ed] hover:underline text-lg font-medium">Game Corner</a>
+            <a href="/admin/sekredata" className="text-[#0a80ed] hover:underline text-lg font-medium">Sekretariat</a>
+          </div>
         {/* Stats */}
         <div className="grid grid-cols-1 gap-4 mb-8 md:grid-cols-3">
           <Card className="bg-[#f0f2f5] border-[#e5e8eb]">

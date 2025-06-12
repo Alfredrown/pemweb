@@ -82,7 +82,11 @@ const handleBooking = async () => {
 
   const data = await res.json();
   setLoading(false);
-  setMessage(data.message || (res.ok ? "Booking successful!" : "Booking failed"));
+  if (res.ok) {
+    alert("Booking successful!");
+  } else {
+    setMessage(data.message || "Booking failed");
+  }
 };
 
  const datehours= new Date().toLocaleString("en-US", {

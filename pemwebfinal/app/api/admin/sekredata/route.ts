@@ -7,7 +7,6 @@ const supabase = createClient(
 );
 
 export async function GET() {
-  // Ambil semua data booking sekre (join ke mahasiswa dan sekretariat)
   const { data, error } = await supabase
     .from("layanan")
     .select(`
@@ -18,7 +17,7 @@ export async function GET() {
       mahasiswa:mahasiswa_nim (nama, nim, no_telp),
       sekretariat:sekretariat_room_id (room_id, nama_ruangan)
     `)
-    .not("sekretariat_room_id", "is", null)
+    .is("game_corner_tv_id", null) // Hanya ambil layanan tanpa room_id
     .order("waktu_mulai_layanan", { ascending: false });
 
   if (error) {
