@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
         waktu_selesai_layanan: timeEnd.toISOString(),
         mahasiswa_nim: nim,
         game_corner_tv_id: game,
-        status: "pending",
+        status: "ongoing",
       },
     ])
 

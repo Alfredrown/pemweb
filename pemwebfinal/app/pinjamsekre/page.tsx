@@ -85,6 +85,15 @@ const handleBooking = async () => {
   setMessage(data.message || (res.ok ? "Booking successful!" : "Booking failed"));
 };
 
+ const datehours= new Date().toLocaleString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  })
+
   return (
     <div className="min-h-screen bg-[#ffffff]">
       {/* Main Content */}
@@ -92,10 +101,9 @@ const handleBooking = async () => {
         {/* Title and Date */}
         <div className="mb-8 text-center">
           <h1 className="text-2xl font-semibold text-[#121417] mb-4">LO/LOF Secretariat</h1>
-          <div className="flex items-center justify-center space-x-4">
-            <div className="px-3 py-1 bg-[#f0f2f5] rounded-md text-sm text-[#61758a]">May 19, 2025</div>
-            <div className="px-3 py-1 bg-[#f0f2f5] rounded-md text-sm text-[#61758a]">09:32 AM</div>
-          </div>
+            <div className="flex items-center justify-center space-x-4">
+            <div className="px-3 py-1 bg-[#f0f2f5] rounded-md text-sm text-[#61758a]">{datehours}</div>
+            </div>
         </div>
 
         {/* Form Fields */}
@@ -138,7 +146,7 @@ const handleBooking = async () => {
               className="bg-[#f0f2f5] border-0 text-[#61758a] placeholder:text-[#858585]"
             />
           </div>
-        </div>
+        </div>  x
 
         {/* Available Secretariat */}
         <div>
