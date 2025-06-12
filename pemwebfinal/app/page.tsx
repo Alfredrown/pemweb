@@ -11,7 +11,7 @@ export default function Component() {
           <div
             className="relative overflow-hidden bg-center bg-cover rounded-2xl h-96"
             style={{
-              backgroundImage: "url('/images/campus-hero.png')",
+              backgroundImage: "url('/fotofilkom.jpg')",
             }}
           >
             <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40">
@@ -29,7 +29,7 @@ export default function Component() {
         <div className="mb-12">
           <h2 className="text-4xl font-bold text-[#121417] mb-4">What Would You Like to Do Today?</h2>
           <p className="text-[#61758a] text-lg mb-12">
-            Explore our services to discover more features designed to enhance your experience.
+            Your FILKOM activities made simpler. Book here to save time and get things done smoothly!
           </p>
 
           {/* Service Cards Grid */}
@@ -43,7 +43,7 @@ export default function Component() {
                     <Calendar className="w-8 h-8 text-[#61758a]" />
                   </div>
                   <h3 className="text-xl font-semibold text-[#121417] mb-2">Game Corner Booking</h3>
-                  <p className="text-[#61758a] text-sm">Reserve game corner slots for recreational activities.</p>
+                  <p className="text-[#61758a] text-sm">Enjoy your break with ease. Book your game slot here — fast, simple, and secure!</p>
                 </CardContent>
               </a>
             </Card>
@@ -56,7 +56,7 @@ export default function Component() {
                     <Users className="w-8 h-8 text-[#61758a]" />
                   </div>
                   <h3 className="text-xl font-semibold text-[#121417] mb-2">LO/LOF Secretariat</h3>
-                  <p className="text-[#61758a] text-sm">Book now and take your organization to the next level.</p>
+                  <p className="text-[#61758a] text-sm">Book the secretariat here and make things happen effortlessly!</p>
                 </CardContent>
               </a>
             </Card>
