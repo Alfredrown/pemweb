@@ -1,7 +1,7 @@
 import { Search, User } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+// import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 export default function Component() {
   const activityData = [
@@ -145,41 +145,20 @@ export default function Component() {
   }
 
   return (
-    <div className="min-h-screen bg-[#ffffff]">
-      {/* Header */}
-      {/* <header className="flex items-center justify-between px-6 py-4 bg-[#ffffff] border-b border-[#e5e8eb]">
-        <div className="flex items-center">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-[#0a80ed] rounded-full flex items-center justify-center">
-              <span className="text-[#ffffff] font-bold text-sm">F</span>
-            </div>
-            <span className="font-bold text-[#0a80ed] text-lg">FILKOM</span>
-          </div>
-        </div>
-
-        <nav className="flex items-center space-x-8">
-          <a href="#" className="text-[#121417] hover:text-[#0a80ed] transition-colors">
-            Game Corner
-          </a>
-          <a href="#" className="text-[#121417] hover:text-[#0a80ed] transition-colors">
-            LO/LOF Secretariat
-          </a>
-          <Avatar className="w-8 h-8 bg-[#0a80ed]">
-            <AvatarFallback className="bg-[#0a80ed] text-[#ffffff]">
-              <User className="w-4 h-4" />
-            </AvatarFallback>
-          </Avatar>
-        </nav>
-      </header> */}
-
-      {/* Main Content */}
+    <div className="min-h-screen bg-[#faf9f6]">
       <main className="px-6 py-8">
-        <div className="mx-auto max-w-7xl">
-          {/* Page Title */}
-          <h1 className="text-3xl font-bold text-[#0a80ed] mb-2">Activity Overview</h1>
-          <h2 className="text-xl font-semibold text-[#121417] mb-6">LO/LOF Secretariat</h2>
+        <div className="mb-6 pb-8">
+        <h1 className="text-[#0a80ed] text-2xl font-semibold mb-2">Activity Overview</h1>
+          <div className="flex items-center gap-4">
+          <h2 className="text-[#121417] text-lg font-medium">
+            <a href="/admin/gamedata" className="hover:underline text-[#0a80ed]">Game Corner</a>
+            </h2>
+            <h2 className="text-[#121417] text-lg font-medium">
+            <a href="/admin/sekredata" className="hover:underline text-[#0a80ed]">Sekretariat</a>
+            </h2>
+          </div>
 
-          {/* Search Bar */}
+       
           <div className="relative mb-6">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#61758a] w-5 h-5" />
             <Input

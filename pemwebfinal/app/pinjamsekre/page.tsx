@@ -8,32 +8,91 @@ import { Label } from "@/components/ui/label"
 import { Search, User } from "lucide-react"
 
 export default function Component() {
-  const [selectedRoom, setSelectedRoom] = useState("")
+  const [selectedRoom, setSelectedRoom] = useState<{ room_id: number; nama_ruangan: string } | null>(null);
   const [searchTerm, setSearchTerm] = useState("")
 
-  const secretariatRooms = [
-    "2.1 Badan Eksekutif Mahasiswa (BEM)",
-    "2.2 Dewan Perwakilan Mahasiswa (DPM)",
-    "2.3 Himpunan Mahasiswa Departemen Teknik Informatika (HIMDTIF)",
-    "2.4 Keluarga Besar Mahasiswa Departemen Sistem Informasi (KBMDSI)",
-    "2.5 Basic Computing Community (BCC)",
-    "2.6 RAION Community",
-    "2.7 POROS",
-    "2.8 POROS",
-    "2.9 ROBOTIK",
-    "2.10 GDSC",
-    "2.11 BNCC",
-    "2.12 LPM-DISPLAY",
-    "2.13 K-RISMA",
-    "2.14 OPTIK",
-    "2.15 PKM DANIEL",
-    "2.16 KMK",
-    "2.17 KE-AMD",
-    "2.18 DEVGIRLS",
-    "2.19 DM KAZOKU",
-  ]
+const secretariatRooms = [
+  { room_id: 21, nama_ruangan: "2.1 Badan Eksekutif Mahasiswa (BEM)" },
+  { room_id: 22, nama_ruangan: "2.2 Dewan Perwakilan Mahasiswa (DPM)" },
+  { room_id: 23, nama_ruangan: "2.3 Himpunan Mahasiswa Departemen Teknik Informatika (HIMDTIF)" },
+  { room_id: 24, nama_ruangan: "2.4 Keluarga Besar Mahasiswa Departemen Sistem Informasi (KBMDSI)" },
+  { room_id: 25, nama_ruangan: "2.5 Basic Computing Community (BCC)" },
+  { room_id: 26, nama_ruangan: "2.6 RAION Community" },
+  { room_id: 27, nama_ruangan: "2.7 POROS" },
+  { room_id: 28, nama_ruangan: "2.8 POROS" },
+  { room_id: 29, nama_ruangan: "2.9 ROBOTIK" },
+  { room_id: 210, nama_ruangan: "2.10 GDSC" },
+  { room_id: 211, nama_ruangan: "2.11 BCC" },
+  { room_id: 212, nama_ruangan: "2.12 LPM-DISPLAY" },
+  { room_id: 213, nama_ruangan: "2.13 K-RISMA" },
+  { room_id: 214, nama_ruangan: "2.14 OPTIK" },
+  { room_id: 215, nama_ruangan: "2.15 PKM DANIEL" },
+  { room_id: 216, nama_ruangan: "2.16 KMK" },
+  { room_id: 217, nama_ruangan: "2.17 LKI-AMD" },
+  { room_id: 218, nama_ruangan: "2.18 DEVGIRLS" },
+  { room_id: 219, nama_ruangan: "2.19 DAI KAZOKU" },
+];
 
-  const filteredRooms = secretariatRooms.filter((room) => room.toLowerCase().includes(searchTerm.toLowerCase()))
+const filteredRooms = secretariatRooms.filter((room) =>
+    room.nama_ruangan.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+const [formData, setFormData] = useState({
+  name: "",
+  nim: "",
+  phoneNumber: "",
+});
+const [message, setMessage] = useState<string | null>(null);
+const [loading, setLoading] = useState(false);
+
+const handleInputChange = (field: string, value: string) => {
+  setFormData((prev) => ({ ...prev, [field]: value }));
+};
+
+const handleBooking = async () => {
+  if (
+    !formData.name ||
+    !formData.nim ||
+    !formData.phoneNumber ||
+    !selectedRoom
+  ) {
+    setMessage("Please fill in all fields and select a room.");
+    return;
+  }
+
+  setLoading(true);
+  setMessage(null);
+
+  // Contoh: waktu mulai sekarang, selesai 1 jam kemudian
+  const waktu_mulai_layanan = new Date();
+  const waktu_selesai_layanan = new Date(waktu_mulai_layanan.getTime() + 60 * 60 * 1000);
+
+  const res = await fetch("/api/sekre", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: formData.name,
+      nim: formData.nim,
+      phoneNumber: formData.phoneNumber,
+      room_id: selectedRoom.room_id,
+      waktu_mulai_layanan: waktu_mulai_layanan.toISOString(),
+      waktu_selesai_layanan: waktu_selesai_layanan.toISOString(),
+    }),
+  });
+
+  const data = await res.json();
+  setLoading(false);
+  setMessage(data.message || (res.ok ? "Booking successful!" : "Booking failed"));
+};
+
+ const datehours= new Date().toLocaleString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  })
 
   return (
     <div className="min-h-screen bg-[#ffffff]">
@@ -42,10 +101,9 @@ export default function Component() {
         {/* Title and Date */}
         <div className="mb-8 text-center">
           <h1 className="text-2xl font-semibold text-[#121417] mb-4">LO/LOF Secretariat</h1>
-          <div className="flex items-center justify-center space-x-4">
-            <div className="px-3 py-1 bg-[#f0f2f5] rounded-md text-sm text-[#61758a]">May 19, 2025</div>
-            <div className="px-3 py-1 bg-[#f0f2f5] rounded-md text-sm text-[#61758a]">09:32 AM</div>
-          </div>
+            <div className="flex items-center justify-center space-x-4">
+            <div className="px-3 py-1 bg-[#f0f2f5] rounded-md text-sm text-[#61758a]">{datehours}</div>
+            </div>
         </div>
 
         {/* Form Fields */}
@@ -57,6 +115,8 @@ export default function Component() {
             <Input
               id="name"
               placeholder="Enter your name"
+              value={formData.name}
+              onChange={(e) => handleInputChange("name", e.target.value)}
               className="bg-[#f0f2f5] border-0 text-[#61758a] placeholder:text-[#858585]"
             />
           </div>
@@ -68,6 +128,8 @@ export default function Component() {
             <Input
               id="nim"
               placeholder="Enter your NIM/NIP"
+              value={formData.nim}
+              onChange={(e) => handleInputChange("nim", e.target.value)}
               className="bg-[#f0f2f5] border-0 text-[#61758a] placeholder:text-[#858585]"
             />
           </div>
@@ -79,10 +141,12 @@ export default function Component() {
             <Input
               id="phone"
               placeholder="Enter your phone number"
+              value={formData.phoneNumber}
+              onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
               className="bg-[#f0f2f5] border-0 text-[#61758a] placeholder:text-[#858585]"
             />
           </div>
-        </div>
+        </div>  x
 
         {/* Available Secretariat */}
         <div>
@@ -103,21 +167,30 @@ export default function Component() {
           <div className="mb-8 space-y-2 overflow-y-auto max-h-96">
             {filteredRooms.map((room) => (
               <div
-                key={room}
+                key={room.room_id}
                 onClick={() => setSelectedRoom(room)}
                 className={`p-3 rounded-md cursor-pointer transition-colors ${
-                  selectedRoom === room ? "bg-[#0a80ed] text-white" : "bg-[#e5e8eb] text-[#61758a] hover:bg-[#d9d9d9]"
+                  selectedRoom?.room_id === room.room_id
+                    ? "bg-[#0a80ed] text-white"
+                    : "bg-[#e5e8eb] text-[#61758a] hover:bg-[#d9d9d9]"
                 }`}
               >
-                {room}
+                {room.nama_ruangan}
               </div>
             ))}
           </div>
 
           {/* Book Button */}
-          <Button className="w-full bg-[#0a80ed] hover:bg-[#0f59d2] text-white py-3 rounded-md">
-            Book Selected Room
-          </Button>
+            <Button
+              className="w-full bg-[#0a80ed] hover:bg-[#0f59d2] text-white py-3 rounded-md"
+              onClick={handleBooking}
+              disabled={loading}
+            >
+              {loading ? "Booking..." : "Book Selected Room"}
+            </Button>
+            {message && (
+              <div className="mt-4 text-center text-sm text-[#0a80ed]">{message}</div>
+            )}
         </div>
 
         {/* Footer Note */}

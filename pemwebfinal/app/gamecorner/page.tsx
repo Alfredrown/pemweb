@@ -6,111 +6,140 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
 export default function GameCornerBooking() {
-  const [selectedSlot, setSelectedSlot] = useState("10:00 AM")
-  const [activeGame, setActiveGame] = useState("Game 1")
+  const [selectedSlot, setSelectedSlot] = useState("")
+  const [activeGame, setActiveGame] = useState<number | null>(null)
   const [formData, setFormData] = useState({
     name: "",
-    nimNip: "",
+    nim: "",
     phoneNumber: "",
   })
 
-  const games = ["Game 1", "Game 2", "Game 3", "Game 4", "Game 5", "Game 6"]
+  const games = [
+    { id: 1, name: "Game 1" },
+    { id: 2, name: "Game 2" },
+    { id: 3, name: "Game 3" },
+    { id: 4, name: "Game 4" },
+    { id: 5, name: "Game 5" },
+    { id: 6, name: "Game 6" },
+  ]
 
   const timeSlots = [
-    "08:00 AM",
-    "09:00 AM",
-    "10:00 AM",
-    "11:00 AM",
-    "12:00 PM",
-    "13:00 PM",
-    "14:00 PM",
-    "15:00 PM",
-    "16:00 PM",
-    "17:00 PM",
+    "08:00",
+    "09:00",
+    "10:00",
+    "11:00",
+    "12:00",
+    "13:00",
+    "14:00",
+    "15:00",
+    "16:00",
+    "17:00",
   ]
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
+  const isValidNim = (nim: string) => {
+    return nim.length >= 5 && nim.substring(2, 5) === "515"
+  }
+  
+
+  const handleBooking = async () => {
+    if (!formData.name || !formData.nim || !formData.phoneNumber || activeGame === null || !selectedSlot) {
+      alert("Please fill in all fields.")
+      return
+    }
+    
+    if (!isValidNim(formData.nim)) {
+      alert("Only students with NIM containing '515' in positions 3-5 can book.")
+      return
+  }
+
+    // Build datetime string
+    const selectedDate = new Date()
+    const [hour, minute] = selectedSlot.split(":")
+    selectedDate.setHours(parseInt(hour))
+    selectedDate.setMinutes(parseInt(minute))
+    selectedDate.setSeconds(0)
+
+    const isoTime = selectedDate.toISOString()
+
+    const response = await fetch("/api/book", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: formData.name,
+        nim: formData.nim,
+        phoneNumber: formData.phoneNumber,
+        game: activeGame,
+        time: isoTime,
+      }),
+    })
+
+    const result = await response.json()
+    if (!response.ok) {
+      alert(result.message || "Booking failed")
+    } else {
+      alert("Booking successful!")
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[#ffffff]">
-
-      {/* Main Content */}
       <main className="max-w-4xl px-6 py-12 mx-auto">
-        {/* Title and Date/Time */}
         <div className="mb-12 text-center">
-          <h1 className="text-[#000000] text-3xl font-bold mb-6">Game Corner Booking</h1>
-          <div className="flex justify-center space-x-4">
-            <span className="px-4 py-2 bg-[#f0f2f5] text-[#61758a] rounded-full text-sm">May 19, 2025</span>
-            <span className="px-4 py-2 bg-[#f0f2f5] text-[#61758a] rounded-full text-sm">09:32 AM</span>
-          </div>
+          <h1 className="text-[##212121] text-3xl font-bold mb-6">Game Corner Booking</h1>
         </div>
 
-        {/* Form */}
         <div className="mb-12 space-y-6">
           <div>
-            <Label htmlFor="name" className="text-[#000000] font-medium mb-2 block">
-              Name
-            </Label>
+            <Label htmlFor="name" className="text-[#212121] font-medium mb-2 block">Name</Label>
             <Input
               id="name"
               placeholder="Enter your name"
               value={formData.name}
               onChange={(e) => handleInputChange("name", e.target.value)}
-              className="w-full border-[#d9d9d9] focus:border-[#0a80ed] focus:ring-[#0a80ed]"
             />
           </div>
-
           <div>
-            <Label htmlFor="nim-nip" className="text-[#000000] font-medium mb-2 block">
-              NIM/NIP
-            </Label>
+            <Label htmlFor="nim" className="text-[##212121] font-medium mb-2 block">NIM</Label>
             <Input
-              id="nim-nip"
-              placeholder="Enter your NIM/NIP"
-              value={formData.nimNip}
-              onChange={(e) => handleInputChange("nimNip", e.target.value)}
-              className="w-full border-[#d9d9d9] focus:border-[#0a80ed] focus:ring-[#0a80ed]"
+              id="nim"
+              placeholder="Enter your NIM"
+              value={formData.nim}
+              onChange={(e) => handleInputChange("nim", e.target.value)}
             />
           </div>
-
           <div>
-            <Label htmlFor="phone" className="text-[#000000] font-medium mb-2 block">
-              Phone Number
-            </Label>
+            <Label htmlFor="phone" className="text-[#212121] font-medium mb-2 block">Phone Number</Label>
             <Input
               id="phone"
               placeholder="Enter your phone number"
               value={formData.phoneNumber}
               onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
-              className="w-full border-[#d9d9d9] focus:border-[#0a80ed] focus:ring-[#0a80ed]"
             />
           </div>
         </div>
 
-        {/* Available Time Slots */}
         <div className="mb-8">
-          <h2 className="text-[#000000] text-xl font-semibold mb-6">Available Time Slots</h2>
+          <h2 className="text-[#212121] text-xl font-semibold mb-6">Available Time Slots</h2>
 
-          {/* Game Tabs */}
           <div className="flex space-x-0 mb-6 border-b border-[#e5e8eb]">
             {games.map((game) => (
               <button
-                key={game}
-                onClick={() => setActiveGame(game)}
+                key={game.id}
+                onClick={() => setActiveGame(game.id)}
                 className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-                  activeGame === game
-                    ? "border-[#000000] text-[#000000]"
+                  activeGame === game.id
+                    ? "border-[#212121] text-[#212121]"
                     : "border-transparent text-[#61758a] hover:text-[#3e3e3e]"
                 }`}
               >
-                {game}
+                {game.name}
               </button>
             ))}
           </div>
 
-          {/* Time Slot Grid */}
           <div className="grid grid-cols-5 gap-3 mb-8">
             {timeSlots.map((slot, index) => (
               <Button
@@ -128,17 +157,19 @@ export default function GameCornerBooking() {
             ))}
           </div>
 
-          {/* Book Button */}
           <div className="flex justify-end">
-            <Button className="bg-[#0a80ed] hover:bg-[#0f59d2] text-white px-6 py-3">Book Selected Slot</Button>
+            <Button
+              onClick={handleBooking}
+              className="bg-[#0a80ed] hover:bg-[#0f59d2] text-white px-6 py-3"
+            >
+              Book Selected Slot
+            </Button>
           </div>
         </div>
 
-        {/* Footer Note */}
         <div className="text-center">
           <p className="text-[#61758a] text-sm">
             After completing your booking, please leave your Student ID Card to the security officer.
-            
           </p>
         </div>
       </main>
