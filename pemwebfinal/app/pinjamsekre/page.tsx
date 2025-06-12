@@ -19,18 +19,17 @@ const secretariatRooms = [
   { room_id: 25, nama_ruangan: "2.5 Basic Computing Community (BCC)" },
   { room_id: 26, nama_ruangan: "2.6 RAION Community" },
   { room_id: 27, nama_ruangan: "2.7 POROS" },
-  { room_id: 28, nama_ruangan: "2.8 POROS" },
-  { room_id: 29, nama_ruangan: "2.9 ROBOTIK" },
-  { room_id: 210, nama_ruangan: "2.10 GDSC" },
-  { room_id: 211, nama_ruangan: "2.11 BCC" },
-  { room_id: 212, nama_ruangan: "2.12 LPM-DISPLAY" },
-  { room_id: 213, nama_ruangan: "2.13 K-RISMA" },
-  { room_id: 214, nama_ruangan: "2.14 OPTIK" },
-  { room_id: 215, nama_ruangan: "2.15 PKM DANIEL" },
-  { room_id: 216, nama_ruangan: "2.16 KMK" },
-  { room_id: 217, nama_ruangan: "2.17 LKI-AMD" },
-  { room_id: 218, nama_ruangan: "2.18 DEVGIRLS" },
-  { room_id: 219, nama_ruangan: "2.19 DAI KAZOKU" },
+  { room_id: 28, nama_ruangan: "2.8 ROBOTIK" },
+  { room_id: 29, nama_ruangan: "2.9 GDSC" },
+  { room_id: 210, nama_ruangan: "2.10 BCC" },
+  { room_id: 211, nama_ruangan: "2.11 LPM-DISPLAY" },
+  { room_id: 212, nama_ruangan: "2.12 K-RISMA" },
+  { room_id: 213, nama_ruangan: "2.13 OPTIK" },
+  { room_id: 214, nama_ruangan: "2.14 PKM DANIEL" },
+  { room_id: 215, nama_ruangan: "2.15 KMK" },
+  { room_id: 216, nama_ruangan: "2.16 LKI-AMD" },
+  { room_id: 217, nama_ruangan: "2.17 DEVGIRLS" },
+  { room_id: 218, nama_ruangan: "2.18 DAI KAZOKU" },
 ];
 
 const filteredRooms = secretariatRooms.filter((room) =>
@@ -150,7 +149,7 @@ const handleBooking = async () => {
               className="bg-[#f0f2f5] border-0 text-[#61758a] placeholder:text-[#858585]"
             />
           </div>
-        </div>  x
+        </div>
 
         {/* Available Secretariat */}
         <div>
