@@ -5,7 +5,7 @@ import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 
-type BookingStatus = "pending" | "ongoing" | "done";
+type BookingStatus = "pending" | "ongoing" | "done" | string;
 
 interface Activity {
   name: string
@@ -21,6 +21,7 @@ export default function Component() {
   const [activityData, setActivityData] = useState<Activity[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [search, setSearch] = useState("")
 
   useEffect(() => {
     const fetchData = async () => {
@@ -28,8 +29,25 @@ export default function Component() {
         const res = await fetch("/api/admin/sekredata")
         if (!res.ok) throw new Error("Failed to fetch data")
 
-        const data = await res.json()
-        setActivityData(Array.isArray(data) ? data : [])
+        const { data } = await res.json()
+        // Map Supabase data ke struktur Activity[]
+        setActivityData(
+          Array.isArray(data)
+            ? data.map((item: any) => ({
+                name: item.mahasiswa?.nama || "-",
+                nim: item.mahasiswa?.nim || "-",
+                phone: item.mahasiswa?.no_telp || "-",
+                room: item.sekretariat?.nama_ruangan || "-",
+                timeStamp: item.waktu_mulai_layanan
+                  ? new Date(item.waktu_mulai_layanan).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+                  : "-",
+                date: item.waktu_mulai_layanan
+                  ? new Date(item.waktu_mulai_layanan).toLocaleDateString()
+                  : "-",
+                status: item.status || "-",
+              }))
+            : []
+        )
       } catch (err: any) {
         setError(err.message || "Something went wrong")
       } finally {
@@ -52,7 +70,14 @@ export default function Component() {
         return <Badge className="bg-gray-400 text-white rounded-full px-3 py-1">{status}</Badge>
     }
   }
-  
+
+  // Filter pencarian
+  const filteredData = activityData.filter(
+    (item) =>
+      item.name.toLowerCase().includes(search.toLowerCase()) ||
+      item.nim.toLowerCase().includes(search.toLowerCase()) ||
+      item.room.toLowerCase().includes(search.toLowerCase())
+  )
 
   return (
     <div className="min-h-screen bg-[#faf9f6]">
@@ -69,6 +94,8 @@ export default function Component() {
             <Input
               type="text"
               placeholder="Search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
               className="pl-10 pr-4 py-3 w-full border border-[#e5e8eb] rounded-lg bg-white"
             />
           </div>
@@ -93,7 +120,7 @@ export default function Component() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#e5e8eb]">
-                    {activityData.map((item, index) => (
+                    {filteredData.map((item, index) => (
                       <tr key={index} className="hover:bg-[#e3f2fd] transition-colors">
                         <td className="px-6 py-4 text-sm text-[#121417]">{item.name}</td>
                         <td className="px-6 py-4 text-sm text-[#61758a]">{item.nim}</td>

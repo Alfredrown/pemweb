@@ -17,13 +17,12 @@ export async function GET() {
       mahasiswa:mahasiswa_nim (nama, nim, no_telp),
       sekretariat:sekretariat_room_id (room_id, nama_ruangan)
     `)
-    .is("game_corner_tv_id", null) // Hanya ambil layanan tanpa room_id
+    .not("sekretariat_room_id", "is", null)
     .order("waktu_mulai_layanan", { ascending: false });
 
   if (error) {
     return NextResponse.json({ message: "Failed to fetch data", error }, { status: 500 });
   }
-  
   return NextResponse.json({ data }, { status: 200 });
 }
 
