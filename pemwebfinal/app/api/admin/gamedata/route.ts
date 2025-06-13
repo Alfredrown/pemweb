@@ -6,16 +6,35 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-export async function GET() {
-  // Ambil semua data booking game corner
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const search = searchParams.get("search") || "";
+
   const { data, error } = await supabase
     .from("layanan")
-    .select("*, mahasiswa:nim (nama, no_telp)")
+    .select(`
+      layanan_id,
+      waktu_mulai_layanan,
+      waktu_selesai_layanan,
+      status,
+      game_corner_tv_id,
+      mahasiswa:mahasiswa_nim (
+        nama,
+        nim,
+        no_telp
+      )
+    `)
+    .is("sekretariat_room_id", null) // Ensure this is correct
+    .not("game_corner_tv_id", "is", null) // Ensure this is correct
+    .ilike("mahasiswa.nama", `%${search}%`) // Search by name
     .order("waktu_mulai_layanan", { ascending: false });
 
   if (error) {
+    console.error("Error fetching data from Supabase:", error);
     return NextResponse.json({ message: "Failed to fetch data", error }, { status: 500 });
   }
+
+  console.log("Fetched data:", data); // Log the data for debugging
   return NextResponse.json({ data }, { status: 200 });
 }
 
