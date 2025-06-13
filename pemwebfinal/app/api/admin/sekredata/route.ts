@@ -6,31 +6,60 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-export async function GET() {
-  const { data, error } = await supabase
-    .from("layanan")
-    .select(`
-      layanan_id,
-      waktu_mulai_layanan,
-      waktu_selesai_layanan,
-      status,
-      mahasiswa:mahasiswa_nim (nama, nim, no_telp),
-      sekretariat:sekretariat_room_id (room_id, nama_ruangan)
-    `)
-    .not("sekretariat_room_id", "is", null)
-    .order("waktu_mulai_layanan", { ascending: false });
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const search = searchParams.get("search") || "";
 
-  if (error) {
-    return NextResponse.json({ message: "Failed to fetch data", error }, { status: 500 });
+  try {
+    // Ambil semua data dulu tanpa filter search
+    const { data: allData, error } = await supabase
+      .from("layanan")
+      .select(`
+        layanan_id,
+        waktu_mulai_layanan,
+        waktu_selesai_layanan,
+        status,
+        sekretariat_room_id,
+        mahasiswa:mahasiswa_nim (nama, nim, no_telp)
+      `)
+      .not("sekretariat_room_id", "is", null)
+      .order("waktu_mulai_layanan", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching data from Supabase:", error);
+      return NextResponse.json({ message: "Failed to fetch data", error }, { status: 500 });
+    }
+
+    // Filter di JavaScript jika ada search term
+    let filteredData = allData || [];
+    
+    if (search && search.trim() !== "") {
+      filteredData = allData?.filter((item: any) => {
+        const nama = item.mahasiswa?.nama?.toLowerCase() || '';
+        const nim = item.mahasiswa?.nim?.toString() || '';
+        const roomId = item.sekretariat_room_id?.toString() || '';
+        const searchLower = search.toLowerCase().trim();
+        
+        return nama.includes(searchLower) || 
+               nim.includes(searchLower) || 
+               roomId.includes(searchLower);
+      }) || [];
+    }
+
+    console.log("Search term:", search);
+    console.log("Filtered data count:", filteredData.length);
+    
+    return NextResponse.json({ data: filteredData }, { status: 200 });
+  } catch (error) {
+    console.error("Unexpected error:", error);
+    return NextResponse.json({ message: "Internal server error", error }, { status: 500 });
   }
-  return NextResponse.json({ data }, { status: 200 });
 }
 
 export async function PATCH(req: NextRequest) {
-  // Update status booking sekre (Done/Returned)
   try {
     const body = await req.json();
-    const { id, status } = body; // id = layanan_id
+    const { id, status } = body;
 
     if (!id || !status) {
       return NextResponse.json({ message: "ID and status required" }, { status: 400 });
@@ -45,29 +74,7 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ message: "Failed to update status", error }, { status: 500 });
     }
 
-    const { nim, room_id, waktu_mulai_layanan, waktu_selesai_layanan } = body;
-
-    const { error: insertBookingError } = await supabase.from("layanan").insert([
-      {
-        mahasiswa_nim: nim,
-        sekretariat_room_id: room_id,
-        waktu_mulai_layanan,
-        waktu_selesai_layanan,
-        status: "ongoing",
-      },
-    ]);
-
-    if (insertBookingError) {
-      // Tampilkan error detail di terminal/server log
-      console.error("Error inserting booking:", insertBookingError);
-      // Kirim error detail ke frontend (bisa dilihat di Network tab)
-      return NextResponse.json(
-        { message: "Failed to save booking", error: insertBookingError },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json({ message: "Status updated" }, { status: 200 });
+    return NextResponse.json({ message: "Status updated successfully" }, { status: 200 });
   } catch (error) {
     return NextResponse.json({ message: "Internal server error", error }, { status: 500 });
   }
@@ -128,7 +135,7 @@ export async function POST(req: NextRequest) {
       sekretariat_room_id: room_id,
       waktu_mulai_layanan,
       waktu_selesai_layanan,
-      status: "In Use",
+      status: "ongoing",
     });
 
     const { error: insertBookingError } = await supabase.from("layanan").insert([
@@ -137,7 +144,7 @@ export async function POST(req: NextRequest) {
         sekretariat_room_id: room_id,
         waktu_mulai_layanan,
         waktu_selesai_layanan,
-        status: "In Use",
+        status: "ongoing",
       },
     ]);
 

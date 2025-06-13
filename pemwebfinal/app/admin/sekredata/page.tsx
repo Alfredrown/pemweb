@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 
 type BookingStatus = "pending" | "ongoing" | "done" | string;
 
@@ -15,6 +16,7 @@ interface Activity {
   timeStamp: string
   date: string
   status: BookingStatus
+  layananId: number 
 }
 
 export default function Component() {
@@ -23,21 +25,119 @@ export default function Component() {
   const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState("")
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetch("/api/admin/sekredata")
-        if (!res.ok) throw new Error("Failed to fetch data")
+  const fetchData = async (searchTerm = "") => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/admin/sekredata?search=${encodeURIComponent(searchTerm)}`)
+      if (!res.ok) throw new Error("Failed to fetch data")
 
-        const { data } = await res.json()
-        // Map Supabase data ke struktur Activity[]
+      const { data } = await res.json()
+      console.log("Raw data from API:", data) // Debug log
+      
+      setActivityData(
+        Array.isArray(data)
+          ? data.map((item: any) => ({
+              name: item.mahasiswa?.nama || "-",
+              nim: item.mahasiswa?.nim || "-",
+              phone: item.mahasiswa?.no_telp || "-",
+              room: item.sekretariat_room_id?.toString() || "-",
+              timeStamp: item.waktu_mulai_layanan
+                ? new Date(item.waktu_mulai_layanan).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+                : "-",
+              date: item.waktu_mulai_layanan
+                ? new Date(item.waktu_mulai_layanan).toLocaleDateString()
+                : "-",
+              status: item.status || "-",
+              layananId: item.layanan_id,
+            }))
+          : []
+      )
+    } catch (err: any) {
+      setError(err.message || "Something went wrong")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  const handleSearch = () => {
+    fetchData(search);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
+
+
+  const getStatusBadge = (status: string, layananId: number) => {
+    switch (status.toLowerCase()) {
+      case "done":
+        return <Badge className="bg-[#e5e8eb] text-[#61758a]">Session Ended</Badge>;
+      case "ongoing":
+        return (
+          <div className="flex items-center gap-2">
+            <Badge className="bg-[#d0f0c0] text-black">In Use</Badge>
+            <Button
+              size="sm"
+              onClick={() => handleStatusUpdate(layananId, "done")}
+              className="bg-[#0a80ed] hover:bg-[#0f59d2] text-white text-xs px-3 py-1 h-6"
+            >
+              Done
+            </Button>
+          </div>
+        );
+      case "pending":
+        return (
+          <div className="flex items-center gap-2">
+            <Badge className="bg-[#fff9c4] text-black">Waiting</Badge>
+            <Button
+              size="sm"
+              onClick={() => handleStatusUpdate(layananId, "done")}
+              variant="outline"
+              className="text-[#0a80ed] border-[#0a80ed] hover:bg-[#e3f2fd] text-xs px-3 py-1 h-6"
+            >
+              Cancel
+            </Button>
+          </div>
+        );
+      default:
+        return <Badge variant="secondary">{status}</Badge>;
+    }
+  };
+
+  const handleStatusUpdate = async (layananId: number, newStatus: string) => {
+    try {
+      const response = await fetch("/api/admin/sekredata", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: layananId,
+          status: newStatus,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update status");
+      }
+
+      // Refresh data setelah update
+      const res = await fetch("/api/admin/sekredata");
+      if (res.ok) {
+        const { data } = await res.json();
         setActivityData(
           Array.isArray(data)
             ? data.map((item: any) => ({
                 name: item.mahasiswa?.nama || "-",
                 nim: item.mahasiswa?.nim || "-",
                 phone: item.mahasiswa?.no_telp || "-",
-                room: item.sekretariat?.nama_ruangan || "-",
+                room: item.sekretariat_room_id?.toString() || "-",
                 timeStamp: item.waktu_mulai_layanan
                   ? new Date(item.waktu_mulai_layanan).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
                   : "-",
@@ -45,59 +145,47 @@ export default function Component() {
                   ? new Date(item.waktu_mulai_layanan).toLocaleDateString()
                   : "-",
                 status: item.status || "-",
+                layananId: item.layanan_id, // Tambahkan layanan_id untuk referensi
               }))
             : []
-        )
-      } catch (err: any) {
-        setError(err.message || "Something went wrong")
-      } finally {
-        setLoading(false)
+        );
       }
+    } catch (error) {
+      console.error("Error updating status:", error);
+      alert("Failed to update status");
     }
-
-    fetchData()
-  }, [])
-
-  const getStatusBadge = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "pending":
-        return <Badge className="bg-yellow-400 text-black rounded-full px-3 py-1">Pending</Badge>
-      case "ongoing":
-        return <Badge className="bg-green-500 text-white rounded-full px-3 py-1">Ongoing</Badge>
-      case "done":
-        return <Badge className="bg-blue-600 text-white rounded-full px-3 py-1">Done</Badge>
-      default:
-        return <Badge className="bg-gray-400 text-white rounded-full px-3 py-1">{status}</Badge>
-    }
-  }
+  };
 
   // Filter pencarian
-  const filteredData = activityData.filter(
-    (item) =>
-      item.name.toLowerCase().includes(search.toLowerCase()) ||
-      item.nim.toLowerCase().includes(search.toLowerCase()) ||
-      item.room.toLowerCase().includes(search.toLowerCase())
-  )
-
+ 
   return (
     <div className="min-h-screen bg-[#faf9f6]">
       <main className="px-6 py-8">
         <div className="mb-6 pb-8">
           <h1 className="text-[#0a80ed] text-2xl font-semibold mb-2">Activity Overview/Sekretariat</h1>
+          
           <div className="flex items-center gap-4">
             <a href="/admin/gamedata" className="text-[#0a80ed] hover:underline text-lg font-medium">Game Corner</a>
             <a href="/admin/sekredata" className="text-[#0a80ed] hover:underline text-lg font-medium">Sekretariat</a>
           </div>
 
+          {/* Search Bar dengan Button */}
           <div className="relative my-6">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#61758a] w-5 h-5" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#61758a] w-4 h-4" />
             <Input
               type="text"
               placeholder="Search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 pr-4 py-3 w-full border border-[#e5e8eb] rounded-lg bg-white"
+              onKeyDown={handleKeyDown}
+              className="pl-10 pr-20 py-3 w-full border border-[#e5e8eb] rounded-lg bg-white"
             />
+            <Button
+              onClick={handleSearch}
+              className="absolute right-3 top-1/2 -translate-y-1/2 bg-[#0a80ed] hover:bg-[#0f59d2] text-white px-4 py-2"
+            >
+              Search
+            </Button>
           </div>
 
           {loading ? (
@@ -120,7 +208,7 @@ export default function Component() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#e5e8eb]">
-                    {filteredData.map((item, index) => (
+                    {activityData.map((item, index) => (
                       <tr key={index} className="hover:bg-[#e3f2fd] transition-colors">
                         <td className="px-6 py-4 text-sm text-[#121417]">{item.name}</td>
                         <td className="px-6 py-4 text-sm text-[#61758a]">{item.nim}</td>
@@ -128,7 +216,7 @@ export default function Component() {
                         <td className="px-6 py-4 text-sm text-[#61758a]">{item.room}</td>
                         <td className="px-6 py-4 text-sm text-[#61758a]">{item.timeStamp}</td>
                         <td className="px-6 py-4 text-sm text-[#61758a]">{item.date}</td>
-                        <td className="px-6 py-4">{getStatusBadge(item.status)}</td>
+                        <td className="px-6 py-4">{getStatusBadge(item.status, item.layananId)}</td>
                       </tr>
                     ))}
                   </tbody>
