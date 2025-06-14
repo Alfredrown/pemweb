@@ -9,12 +9,23 @@ const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
   : "http://localhost:3000";
 
-export const metadata: Metadata = {
-  metadataBase: new URL(defaultUrl),
-  title: "Next.js and Supabase Starter Kit",
-  description: "The fastest way to build apps with Next.js and Supabase",
-};
-
+  export const metadata: Metadata = {
+    metadataBase: new URL(defaultUrl),
+    title: "SIMANGGA",
+    description: "SIMANGGA",
+    icons: {
+      icon: [
+        { url: '/logofilkom.png', sizes: '32x32', type: 'image/png' },
+        { url: '/logofilkom.png', sizes: '16x16', type: 'image/png' }
+      ],
+      shortcut: [
+        { url: '/logofilkom.png', sizes: '196x196', type: 'image/png' }
+      ],
+      apple: [
+        { url: '/logofilkom.png', sizes: '180x180', type: 'image/png' }
+      ]
+    }
+  };
 const geistSans = Geist({
   variable: "--font-geist-sans",
   display: "swap",
