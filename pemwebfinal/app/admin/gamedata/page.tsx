@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -71,9 +70,34 @@ export default function GameCornerTable() {
       handleSearch();
     }
   };
-
-  const getStatusBadge = (status: BookingStatus) => {
-    switch (status) {
+  const handleStatusUpdate = async (layananId: number, newStatus: string) => {
+    try {
+      const response = await fetch("/api/admin/gamedata", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: layananId,
+          status: newStatus,
+        }),
+      });
+  
+      const result = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to update status");
+      }
+  
+      // Refresh the data after successful update
+      fetchData();
+    } catch (error) {
+      console.error("Error updating status:", error);
+      alert(error instanceof Error ? error.message : "Failed to update status");
+    }
+  };
+  const getStatusBadge = (status: BookingStatus, layananId: number) => {
+    switch (status.toLowerCase()) {
       case "done":
         return <Badge className="bg-[#e5e8eb] text-[#61758a]">Session Ended</Badge>;
       case "ongoing":
@@ -82,6 +106,7 @@ export default function GameCornerTable() {
             <Badge className="bg-[#d0f0c0] text-black">Playing</Badge>
             <Button
               size="sm"
+              onClick={() => handleStatusUpdate(layananId, "done")}
               className="bg-[#0a80ed] hover:bg-[#0f59d2] text-white text-xs px-3 py-1 h-6"
             >
               Done
@@ -94,6 +119,7 @@ export default function GameCornerTable() {
             <Badge className="bg-[#fff9c4] text-black">Waiting</Badge>
             <Button
               size="sm"
+              onClick={() => handleStatusUpdate(layananId, "done")}
               variant="outline"
               className="text-[#0a80ed] border-[#0a80ed] hover:bg-[#e3f2fd] text-xs px-3 py-1 h-6"
             >
@@ -169,7 +195,7 @@ export default function GameCornerTable() {
         <td className="p-4 text-sm text-[#61758a]">{row.game}</td>
         <td className="p-4 text-sm text-[#61758a]">{row.startTime}</td>
         <td className="p-4 text-sm text-[#61758a]">{row.endTime}</td>
-        <td className="p-4">{getStatusBadge(row.status)}</td>
+        <td className="p-4">{getStatusBadge(row.status, row.layanan_id)}</td>
       </tr>
     ))
   )}

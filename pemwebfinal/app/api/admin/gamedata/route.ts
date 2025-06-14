@@ -39,30 +39,59 @@ export async function GET(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
-  // Update status booking (Done/Canceled)
   try {
     const body = await req.json();
-    const { id, status } = body; // id = id layanan
+    const { id, status } = body;
+
+    console.log("Updating status:", { id, status }); // Debug log
 
     if (!id || !status) {
       return NextResponse.json({ message: "ID and status required" }, { status: 400 });
     }
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("layanan")
-      .update({ status })
-      .eq("id", id);
+      .update({ status: status })
+      .eq("layanan_id", id)
+      .select()
+      .single();
 
     if (error) {
-      return NextResponse.json({ message: "Failed to update status", error }, { status: 500 });
+      console.error("Database error:", error); // Debug log
+      return NextResponse.json(
+        { 
+          message: "Failed to update status", 
+          error: error.message 
+        }, 
+        { status: 500 }
+      );
     }
 
-    return NextResponse.json({ message: "Status updated" }, { status: 200 });
+    if (!data) {
+      return NextResponse.json(
+        { message: "Record not found" }, 
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(
+      { 
+        message: "Status updated successfully",
+        data: data 
+      }, 
+      { status: 200 }
+    );
   } catch (error) {
-    return NextResponse.json({ message: "Internal server error", error }, { status: 500 });
+    console.error("Unexpected error:", error); // Debug log
+    return NextResponse.json(
+      { 
+        message: "Internal server error",
+        error: error instanceof Error ? error.message : "Unknown error"
+      }, 
+      { status: 500 }
+    );
   }
 }
-
 export async function DELETE(req: NextRequest) {
   // Hapus booking
   try {
